@@ -16,7 +16,7 @@ def create_user(db: Session, user: schemas.DeepliftUserCreate):
     db_user = models.DeepliftUser(
         email=user.email, 
         firstName=user.firstName,
-        lastName=user.firstName,
+        lastName=user.lastName,
         bodyweight=user.bodyweight,
         age=user.age,
         dateJoined=join_date,
