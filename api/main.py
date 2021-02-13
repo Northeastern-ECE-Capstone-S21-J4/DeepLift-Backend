@@ -4,8 +4,14 @@ from typing import List, Optional
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 
-import crud, models, schemas
+import crud
+import models
+import schemas
 from database import SessionLocal, engine
+
+from fastapi import FastAPI, Body, Depends
+
+from auth import signJWT, JWTBearer
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -42,7 +48,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q }
+    return {"item_id": item_id, "q": q}
 
 
 @app.post("/users", response_model=schemas.DeepliftUser)
@@ -56,3 +62,8 @@ def create_user(user: schemas.DeepliftUserCreate, db: Session = Depends(get_db))
 @app.post("/users/{user_id}/add_workout", response_model=schemas.Workout)
 def add_workout(user_id: int, workout: schemas.WorkoutCreate, db: Session = Depends(get_db)):
     return crud.create_workout(db=db, workout=workout, user_id=user_id)
+
+
+@app.get("/token/{user_name}/{user_pw}")
+def get_token(user_name: str, user_pw: str):
+    return signJWT(user_name)

@@ -1,4 +1,5 @@
 import datetime
+import time
 
 import jwt
 from decouple import config
@@ -10,6 +11,13 @@ JWT_SECRET = config("secret")
 JWT_ALGORITHM = "HS256"
 
 
+def check_pw(user_name, user_pw):
+    pw = config(user_name)
+    if(user_pw == pw):
+        return True
+    return False
+
+
 def token_response(token: str):
     return {
         "access_token": token
@@ -19,7 +27,7 @@ def token_response(token: str):
 def signJWT(user_id: str):
     payload = {
         "user_id": user_id,
-        "expires": datetime.datetime(2021, 4, 30, 24, 00)
+        "expires": time.mktime(datetime.datetime(2021, 5, 1).timetuple())
     }
 
     token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
