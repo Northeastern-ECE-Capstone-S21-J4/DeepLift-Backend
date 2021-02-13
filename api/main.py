@@ -11,7 +11,7 @@ from database import SessionLocal, engine
 
 from fastapi import FastAPI, Body, Depends
 
-from auth import signJWT, JWTBearer
+from auth import signJWT, check_pw, JWTBearer
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -51,7 +51,7 @@ def read_item(item_id: int, q: Optional[str] = None):
     return {"item_id": item_id, "q": q}
 
 
-@app.post("/users", response_model=schemas.DeepliftUser)
+@app.post("/users", dependencies=[Depends(JWTBearer())], response_model=schemas.DeepliftUser)
 def create_user(user: schemas.DeepliftUserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
@@ -59,11 +59,14 @@ def create_user(user: schemas.DeepliftUserCreate, db: Session = Depends(get_db))
     return crud.create_user(db=db, user=user)
 
 
-@app.post("/users/{user_id}/add_workout", response_model=schemas.Workout)
+@app.post("/users/{user_id}/add_workout", dependencies=[Depends(JWTBearer())], response_model=schemas.Workout)
 def add_workout(user_id: int, workout: schemas.WorkoutCreate, db: Session = Depends(get_db)):
     return crud.create_workout(db=db, workout=workout, user_id=user_id)
 
 
 @app.get("/token/{user_name}/{user_pw}")
 def get_token(user_name: str, user_pw: str):
-    return signJWT(user_name)
+    if(check_pw(user_name, user_pw)):
+        return signJWT(user_name)
+
+    return { "error" : "Invalid credentials"}
