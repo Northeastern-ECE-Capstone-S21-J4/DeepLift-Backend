@@ -10,13 +10,13 @@ JWT_SECRET = config("secret")
 JWT_ALGORITHM = "HS256"
 
 
-def token_response(token):
+def token_response(token: str):
     return {
         "access_token": token
     }
 
 
-def signJWT(user_id):
+def signJWT(user_id: str):
     payload = {
         "user_id": user_id,
         "expires": datetime.datetime(2021, 4, 30, 24, 00)
@@ -27,7 +27,7 @@ def signJWT(user_id):
     return token_response(token)
 
 
-def decodeJWT(token):
+def decodeJWT(token: str):
     try:
         decoded_token = jwt.decode(
             token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
@@ -40,7 +40,7 @@ class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
-    async def __call__(self, request):
+    async def __call__(self, request: Request):
         credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
@@ -54,7 +54,7 @@ class JWTBearer(HTTPBearer):
             raise HTTPException(
                 status_code=403, detail="Invalid authorization code.")
 
-    def verify_jwt(self, jwtoken):
+    def verify_jwt(self, jwtoken: str):
         isTokenValid: bool = False
 
         try:
