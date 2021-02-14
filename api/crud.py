@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session, load_only
 import models
 import schemas.user, schemas.workout, schemas.exercise
-import schemas_old
 from datetime import datetime
 
 
