@@ -29,6 +29,9 @@ def get_db():
 def read_root():
     return "Hello DeepLift!"
 
+# -----------------------------------------------------------------------------------------------------
+# /users
+
 
 # [GET] Return the names of all users in the db (only names).
 # USES: Friends list, search users
@@ -47,15 +50,18 @@ def get_user_profile(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
+# -----------------------------------------------------------------------------------------------------
+# /workouts
+
 
 # [GET] Return all workouts linked to a specific user
 # USES: See all past workouts
-# @app.get("/workouts/user/{user_id}", response_model=schemas.workouts.UserProfile)
-# def get_user_workouts(user_id: int, db: Session = Depends(get_db)):
-#     db_user = crud.get_user_workouts(db, user_id=user_id)
-#     if db_user is None:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return db_user
+@app.get("/workouts/user/{user_id}", response_model=List[schemas.workout.Workout])
+def get_user_workouts(user_id: int, db: Session = Depends(get_db)):
+    db_user_workouts = crud.get_user_workouts(db, user_id=user_id)
+    if db_user_workouts is None:
+        raise HTTPException(status_code=404, detail="User workouts not found")
+    return db_user_workouts
 
 
 # @app.get("/items/{item_id}")

@@ -31,6 +31,9 @@ class DeepliftUserProfile(DeepliftUserNames):
     dateJoined: date
     email: str
 
+# -------------------------------------------------------------------------------------------------------
+# [POST]
+
 
 class DeepliftUserCreate(DeepliftUserBase):
     email: str

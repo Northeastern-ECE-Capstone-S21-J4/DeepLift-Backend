@@ -1,12 +1,12 @@
 from pydantic import BaseModel
 
 
-class ExcerciseBase(BaseModel):
+class ExerciseBase(BaseModel):
     exerciseName: str
 
 
-class Exercise(ExcerciseBase):
-    excerciseID: int
+class Exercise(ExerciseBase):
+    exerciseID: int
 
     class Config:
         orm_mode = True
