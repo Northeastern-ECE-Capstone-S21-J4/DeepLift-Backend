@@ -1,17 +1,30 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 import models
-import schemas
+import schemas.user, schemas.workout, schemas.exercise
+import schemas_old
 from datetime import datetime
 
-def get_user(db: Session, user_id: int):
+
+# Query the DeepliftUser table and return a list of First and Last Names of all users in DB
+def get_user_names(db: Session):
+    return db.query(models.DeepliftUser).options(load_only(*['firstName', 'lastName'])).all()
+
+
+# Query the DeeplistUser table and return all information for a specific userID
+def get_user_profile(db: Session, user_id: int):
     return db.query(models.DeepliftUser).filter(models.DeepliftUser.userID == user_id).first()
+
+
+# Query the Workout table and get all workouts for a specific userID
+def get_user_workouts(db: Session, user_id: int):
+    return db.query(models.Workout).filter(models.DeepliftUser.userID == user_id).all()
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.DeepliftUser).offset(skip).limit(limit).all()
 
 
-def create_user(db: Session, user: schemas.DeepliftUserCreate):
+def create_user(db: Session, user: schemas.user.DeepliftUserCreate):
     join_date = datetime.now().isoformat()
     db_user = models.DeepliftUser(
         email=user.email, 
@@ -31,7 +44,7 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.DeepliftUser).filter(models.DeepliftUser.email == email).first()
 
 
-def create_workout(db: Session, workout: schemas.WorkoutCreate, user_id: int):
+def create_workout(db: Session, workout: schemas.workout.WorkoutCreate, user_id: int):
     workout_date = datetime.now().isoformat()
     db_item = models.Workout(**workout.dict(), dateRecorded=workout_date, userID=user_id)
     db.add(db_item)

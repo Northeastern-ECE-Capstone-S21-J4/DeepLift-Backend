@@ -10,7 +10,7 @@ CREATE TABLE DeepliftUser (
 userID INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
 firstName VARCHAR(50) NOT NULL,
 lastName VARCHAR(50) NOT NULL,
-email VARCHAR(50) NOT NULL,
+email VARCHAR(50) NOT NULL UNIQUE,
 bodyweight INT NOT NULL,
 age INT NOT NULL,
 dateJoined DATE NOT NULL,
@@ -21,7 +21,7 @@ CHECK (age >= 18)
 # A table representing an exercise that can be performed
 CREATE TABLE Exercise (
 exerciseID INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-exerciseName VARCHAR(25)
+exerciseName VARCHAR(25) NOT NULL UNIQUE
 );
 
 # A table representing a user's set (1)
