@@ -54,14 +54,53 @@ def get_user_profile(user_id: int, db: Session = Depends(get_db)):
 # /workouts
 
 
+# [GET] Return a workout with the given workoutID
+# USES: Click on a certain workout
+@app.get("/workouts/{workout_id}", response_model=schemas.workout.Workout)
+def get_workout(workout_id: int, db: Session = Depends(get_db)):
+    db_workout = crud.get_workout(db, workout_id=workout_id)
+    if db_workout is None:
+        raise HTTPException(status_code=404, detail="User or User workouts not found")
+    return db_workout
+
 # [GET] Return all workouts linked to a specific user
 # USES: See all past workouts
 @app.get("/workouts/user/{user_id}", response_model=List[schemas.workout.Workout])
 def get_user_workouts(user_id: int, db: Session = Depends(get_db)):
     db_user_workouts = crud.get_user_workouts(db, user_id=user_id)
     if db_user_workouts is None:
-        raise HTTPException(status_code=404, detail="User workouts not found")
+        raise HTTPException(status_code=404, detail="User or User workouts not found")
     return db_user_workouts
+
+# [GET] Return all workouts linked to a specific user and exercise
+# USES: See all past workouts by exercise
+@app.get("/workouts/user/{user_id}/ex/{ex_id}", response_model=List[schemas.workout.Workout])
+def get_user_ex_wo(user_id: int, ex_id: int, db: Session = Depends(get_db)):
+    db_user_workouts = crud.get_user_ex_wo(db, user_id=user_id, ex_id=ex_id)
+    if db_user_workouts is None:
+        raise HTTPException(status_code=404, detail="User or User workouts not found")
+    return db_user_workouts
+
+
+# [GET] Return all workouts linked to a specific user on a given date
+# USES: See all past workouts by date
+@app.get("/workouts/user/{user_id}/date/{date_recorded}", response_model=List[schemas.workout.Workout])
+def get_user_date_wo(user_id: int, date_recorded: str, db: Session = Depends(get_db)):
+    db_user_workouts = crud.get_user_date_wo(db, user_id=user_id, date_recorded=date_recorded)
+    if db_user_workouts is None:
+        raise HTTPException(status_code=404, detail="User or User workouts not found")
+    return db_user_workouts
+
+# -----------------------------------------------------------------------------------------------------
+# /exercises
+
+
+# [GET] Return all information in the Exercise table
+# USES: Front-end for workouts by exercise, exercise list for creating workout
+@app.get("/exercises", response_model=List[schemas.exercise.Exercise])
+def get_exercises(db: Session = Depends(get_db)):
+    db_exercises = crud.get_exercises(db)
+    return db_exercises
 
 
 # @app.get("/items/{item_id}")

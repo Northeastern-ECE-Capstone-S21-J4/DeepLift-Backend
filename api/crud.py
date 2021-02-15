@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, load_only
 import models
 import schemas.user, schemas.workout, schemas.exercise
-from datetime import datetime
+from datetime import date
 
 # -----------------------------------------------------------------------------------------------------
 # /users
@@ -20,6 +20,19 @@ def get_user_profile(db: Session, user_id: int):
 # /workouts
 
 
+# Query the Workout table and return all information for a specific workoutID
+def get_workout(db: Session, workout_id: int):
+    out = db.query(models.Workout).filter(
+        models.Workout.workoutID == workout_id
+    ).join(
+        models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
+    ).first()
+
+    out.exerciseName = out.exercise.exerciseName
+
+    return out
+
+
 # Query the Workout table and get all workouts for a specific userID
 def get_user_workouts(db: Session, user_id: int):
     out = db.query(models.Workout).filter(
@@ -32,6 +45,45 @@ def get_user_workouts(db: Session, user_id: int):
         out[e].exerciseName = i.exercise.exerciseName
 
     return out
+
+# Query the Workout table and get all workouts for a specific userID and exercise_id
+def get_user_ex_wo(db: Session, user_id: int, ex_id: int):
+    out = db.query(models.Workout).filter(
+        models.Workout.userID == user_id
+    ).filter(
+        models.Workout.exerciseID == ex_id
+    ).join(
+        models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
+    ).all()
+
+    for e, i in enumerate(out):
+        out[e].exerciseName = i.exercise.exerciseName
+
+    return out
+
+
+# Query the Workout table and get all workouts for a specific userID and exercise_id
+def get_user_date_wo(db: Session, user_id: int, date_recorded: str):
+    out = db.query(models.Workout).filter(
+        models.Workout.userID == user_id
+    ).filter(
+        models.Workout.dateRecorded == date_recorded
+    ).join(
+        models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
+    ).all()
+
+    for e, i in enumerate(out):
+        out[e].exerciseName = i.exercise.exerciseName
+
+    return out
+
+# -----------------------------------------------------------------------------------------------------
+# /users
+
+
+# Query the Exercise table and return all information
+def get_exercises(db: Session):
+    return db.query(models.Exercise).all()
 
 # def get_users(db: Session, skip: int = 0, limit: int = 100):
 #     return db.query(models.DeepliftUser).offset(skip).limit(limit).all()
