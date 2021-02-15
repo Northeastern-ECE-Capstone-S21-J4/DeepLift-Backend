@@ -9,7 +9,7 @@ from datetime import date
 
 # Query the DeepliftUser table and return a list of First and Last Names of all users in DB
 def get_user_names(db: Session):
-    return db.query(models.DeepliftUser).options(load_only(*['firstName', 'lastName'])).all()
+    return db.query(models.DeepliftUser.userID, models.DeepliftUser.firstName, models.DeepliftUser.lastName).all()
 
 
 # Query the DeeplistUser table and return all information for a specific userID
