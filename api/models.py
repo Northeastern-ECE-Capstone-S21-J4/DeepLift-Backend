@@ -8,11 +8,11 @@ class DeepliftUser(Base):
     __tablename__ = "DeepliftUser"
 
     userID = Column(Integer, primary_key=True, index=True)
-    firstName = Column(String, default='')
-    lastName = Column(String, default='')
-    email = Column(String, unique=True)
-    bodyweight = Column(Integer, default=1)
-    age = Column(Integer, default=19)
+    firstName = Column(String)
+    lastName = Column(String)
+    email = Column(String)
+    bodyweight = Column(Integer)
+    age = Column(Integer)
     dateJoined = Column(Date)
 
     workouts = relationship("Workout", back_populates="user")
@@ -25,7 +25,7 @@ class Workout(Base):
     userID = Column(Integer, ForeignKey("DeepliftUser.userID"))
     reps = Column(Integer)
     weight = Column(Integer)
-    exerciseID = Column(Integer, ForeignKey('Exercise.exerciseID'))
+    exerciseID = Column(Integer, ForeignKey("Exercise.exerciseID"))
     dateRecorded = Column(Date)
     difficulty = Column(Integer)
 
@@ -37,4 +37,4 @@ class Exercise(Base):
     __tablename__ = "Exercise"
 
     exerciseID = Column(Integer, primary_key=True)
-    exerciseName = Column(String)
+    exerciseName = Column(String, unique=True)
