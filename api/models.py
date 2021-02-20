@@ -15,8 +15,6 @@ class DeepliftUser(Base):
     age = Column(Integer)
     dateJoined = Column(Date)
 
-    workouts = relationship("Workout", back_populates="user")
-
 
 class Workout(Base):
     __tablename__ = "Workout"
@@ -29,7 +27,6 @@ class Workout(Base):
     dateRecorded = Column(Date)
     difficulty = Column(Integer)
 
-    user = relationship("DeepliftUser", back_populates="workouts")
     exercise = relationship("Exercise")
 
 

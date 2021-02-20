@@ -16,6 +16,23 @@ def get_user_names(db: Session):
 def get_user_profile(db: Session, user_name: str):
     return db.query(models.DeepliftUser).filter(models.DeepliftUser.userName == user_name).first()
 
+
+# Create a user with the given information
+def create_user(db: Session, user: schemas.user.DeepliftUserCreate):
+    join_date = date.today().isoformat()
+    db_user = models.DeepliftUser(
+        userName=user.userName,
+        email=user.email,
+        firstName=user.firstName,
+        lastName=user.lastName,
+        bodyweight=user.bodyweight,
+        age=user.age,
+        dateJoined=join_date)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
 # -----------------------------------------------------------------------------------------------------
 # /workouts
 
@@ -45,6 +62,7 @@ def get_user_workouts(db: Session, user_name: str):
         out[e].exerciseName = i.exercise.exerciseName
 
     return out
+
 
 # Query the Workout table and get all workouts for a specific userID and exercise_id
 def get_user_ex_wo(db: Session, user_name: str, ex_id: int):
@@ -77,18 +95,51 @@ def get_user_date_wo(db: Session, user_name: str, date_recorded: str):
 
     return out
 
+
+def create_workout(db: Session, workout: schemas.workout.WorkoutCreate, user_name: str):
+    workout_date = date.today().isoformat()
+    db_workout = models.Workout(
+        userName=user_name,
+        reps=workout.reps,
+        weight=workout.weight,
+        exerciseID=workout.exerciseID,
+        dateRecorded=workout_date,
+        difficulty=workout.difficulty)
+    db.add(db_workout)
+    db.commit()
+    db.refresh(db_workout)
+    return db_workout
+
 # -----------------------------------------------------------------------------------------------------
-# /users
+# /exercises
 
 
 # Query the Exercise table and return all information
 def get_exercises(db: Session):
     return db.query(models.Exercise).all()
 
-# def get_users(db: Session, skip: int = 0, limit: int = 100):
-#     return db.query(models.DeepliftUser).offset(skip).limit(limit).all()
-#
-#
+# -----------------------------------------------------------------------------------------------------
+# Helper Functions
+
+
+# Check if a user with the given email exists in the database
+def user_email_exists(db: Session, email: str):
+    user = db.query(models.DeepliftUser.userName).filter(
+        models.DeepliftUser.email == email
+    ).first()
+
+    return user is not None
+
+
+# Check if a user with the given username exists in the database
+def user_username_exists(db: Session, user_name: str):
+    user = db.query(models.DeepliftUser.userName).filter(
+        models.DeepliftUser.userName == user_name
+    ).first()
+
+    return user is not None
+
+
 # def create_user(db: Session, user: schemas.user.DeepliftUserCreate):
 #     join_date = datetime.now().isoformat()
 #     db_user = models.DeepliftUser(
@@ -103,11 +154,6 @@ def get_exercises(db: Session):
 #     db.commit()
 #     db.refresh(db_user)
 #     return db_user
-#
-#
-# def get_user_by_email(db: Session, email: str):
-#     return db.query(models.DeepliftUser).filter(models.DeepliftUser.email == email).first()
-#
 #
 # def create_workout(db: Session, workout: schemas.workout.WorkoutCreate, user_id: int):
 #     workout_date = datetime.now().isoformat()

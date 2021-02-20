@@ -35,7 +35,7 @@ def read_root():
 
 # [GET] Return the names of all users in the db (only names).
 # USES: Friends list, search users
-@app.get("/users", response_model=List[schemas.user.DeepliftUserNames])
+@app.get("/users", response_model=List[schemas.user.DeepliftUserBase])
 def get_user_names(db: Session = Depends(get_db)):
     users = crud.get_user_names(db)
     return users
@@ -50,6 +50,17 @@ def get_user_profile(user_name: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
+# [POST] Create a new user
+# USES: Create new user on sign-up
+#@app.post("/users", dependencies=[Depends(JWTBearer())], response_model=schemas.user.DeepliftUserCreate)
+@app.post("/users", response_model=schemas.user.DeepliftUserCreate)
+def create_user(user: schemas.user.DeepliftUserCreate, db: Session = Depends(get_db)):
+    if crud.user_email_exists(db, email=user.email):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    if crud.user_username_exists(db, user.userName):
+        raise HTTPException(status_code=400, detail="Username already registered")
+    return crud.create_user(db=db, user=user)
+
 # -----------------------------------------------------------------------------------------------------
 # /workouts
 
@@ -63,6 +74,7 @@ def get_workout(workout_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User or User workouts not found")
     return db_workout
 
+
 # [GET] Return all workouts linked to a specific user
 # USES: See all past workouts
 @app.get("/workouts/user/{user_name}", response_model=List[schemas.workout.Workout])
@@ -71,6 +83,7 @@ def get_user_workouts(user_name: str, db: Session = Depends(get_db)):
     if db_user_workouts is None:
         raise HTTPException(status_code=404, detail="User or User workouts not found")
     return db_user_workouts
+
 
 # [GET] Return all workouts linked to a specific user and exercise
 # USES: See all past workouts by exercise
@@ -90,6 +103,14 @@ def get_user_date_wo(user_name: str, date_recorded: str, db: Session = Depends(g
     if db_user_workouts is None:
         raise HTTPException(status_code=404, detail="User or User workouts not found")
     return db_user_workouts
+
+
+# [POST] Create a new workout
+# USES: Create new workout
+#@app.post("/users", dependencies=[Depends(JWTBearer())], response_model=schemas.user.DeepliftUserCreate)
+@app.post("/workouts/{user_name}", response_model=schemas.workout.WorkoutCreate)
+def create_workout(user_name: str, workout: schemas.workout.WorkoutCreate, db: Session = Depends(get_db)):
+    return crud.create_workout(db=db, user_name=user_name, workout=workout)
 
 # -----------------------------------------------------------------------------------------------------
 # /exercises
@@ -119,11 +140,12 @@ def get_exercises(db: Session = Depends(get_db)):
 # @app.post("/users/{user_id}/add_workout", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.Workout)
 # def add_workout(user_id: int, workout: schemas.workout.WorkoutCreate, db: Session = Depends(get_db)):
 #     return crud.create_workout(db=db, workout=workout, user_id=user_id)
-
+# -----------------------------------------------------------------------------------------------------
+# /token
 
 @app.get("/token/{user_name}/{user_pw}")
 def get_token(user_name: str, user_pw: str):
-    if(check_pw(user_name, user_pw)):
+    if check_pw(user_name, user_pw):
         return signJWT(user_name)
 
-    return { "error" : "Invalid credentials"}
+    return {"error": "Invalid credentials"}

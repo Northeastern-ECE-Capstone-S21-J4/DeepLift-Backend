@@ -9,7 +9,6 @@ from datetime import date
 class WorkoutBase(BaseModel):
     reps: int
     weight: int
-    exerciseName: str
     difficulty: int
 
 # -------------------------------------------------------------------------------------------------------
@@ -18,6 +17,7 @@ class WorkoutBase(BaseModel):
 
 class Workout(WorkoutBase):
     workoutID: int
+    exerciseName: str
     dateRecorded: date
 
     class Config:
@@ -27,7 +27,9 @@ class Workout(WorkoutBase):
 # [POST]
 
 
-# class WorkoutCreate(WorkoutBase):
-#     reps: int
-#     weight: int
-#     difficulty: int
+class WorkoutCreate(WorkoutBase):
+    exerciseID: int
+
+    # Allow for lists
+    class Config:
+        orm_mode = True
