@@ -43,9 +43,9 @@ def get_user_names(db: Session = Depends(get_db)):
 
 # [GET] Return all profile information relevant to a specific user (not workouts)
 # USES: User profile page
-@app.get("/users/{user_id}", response_model=schemas.user.DeepliftUserProfile)
-def get_user_profile(user_id: int, db: Session = Depends(get_db)):
-    db_user = crud.get_user_profile(db, user_id=user_id)
+@app.get("/users/{user_name}", response_model=schemas.user.DeepliftUserProfile)
+def get_user_profile(user_name: str, db: Session = Depends(get_db)):
+    db_user = crud.get_user_profile(db, user_name=user_name)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
@@ -65,18 +65,18 @@ def get_workout(workout_id: int, db: Session = Depends(get_db)):
 
 # [GET] Return all workouts linked to a specific user
 # USES: See all past workouts
-@app.get("/workouts/user/{user_id}", response_model=List[schemas.workout.Workout])
-def get_user_workouts(user_id: int, db: Session = Depends(get_db)):
-    db_user_workouts = crud.get_user_workouts(db, user_id=user_id)
+@app.get("/workouts/user/{user_name}", response_model=List[schemas.workout.Workout])
+def get_user_workouts(user_name: str, db: Session = Depends(get_db)):
+    db_user_workouts = crud.get_user_workouts(db, user_name=user_name)
     if db_user_workouts is None:
         raise HTTPException(status_code=404, detail="User or User workouts not found")
     return db_user_workouts
 
 # [GET] Return all workouts linked to a specific user and exercise
 # USES: See all past workouts by exercise
-@app.get("/workouts/user/{user_id}/ex/{ex_id}", response_model=List[schemas.workout.Workout])
-def get_user_ex_wo(user_id: int, ex_id: int, db: Session = Depends(get_db)):
-    db_user_workouts = crud.get_user_ex_wo(db, user_id=user_id, ex_id=ex_id)
+@app.get("/workouts/user/{user_name}/ex/{ex_id}", response_model=List[schemas.workout.Workout])
+def get_user_ex_wo(user_name: str, ex_id: int, db: Session = Depends(get_db)):
+    db_user_workouts = crud.get_user_ex_wo(db, user_name=user_name, ex_id=ex_id)
     if db_user_workouts is None:
         raise HTTPException(status_code=404, detail="User or User workouts not found")
     return db_user_workouts
@@ -84,9 +84,9 @@ def get_user_ex_wo(user_id: int, ex_id: int, db: Session = Depends(get_db)):
 
 # [GET] Return all workouts linked to a specific user on a given date
 # USES: See all past workouts by date
-@app.get("/workouts/user/{user_id}/date/{date_recorded}", response_model=List[schemas.workout.Workout])
-def get_user_date_wo(user_id: int, date_recorded: str, db: Session = Depends(get_db)):
-    db_user_workouts = crud.get_user_date_wo(db, user_id=user_id, date_recorded=date_recorded)
+@app.get("/workouts/user/{user_name}/date/{date_recorded}", response_model=List[schemas.workout.Workout])
+def get_user_date_wo(user_name: str, date_recorded: str, db: Session = Depends(get_db)):
+    db_user_workouts = crud.get_user_date_wo(db, user_name=user_name, date_recorded=date_recorded)
     if db_user_workouts is None:
         raise HTTPException(status_code=404, detail="User or User workouts not found")
     return db_user_workouts

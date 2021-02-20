@@ -17,7 +17,7 @@ class DeepliftUserBase(BaseModel):
 
 # Model for UserNames. Stores First and Last Name for a user
 class DeepliftUserNames(DeepliftUserBase):
-    userID: int
+    userName: str
 
     # Allow for lists
     class Config:

@@ -7,7 +7,7 @@ from database import Base
 class DeepliftUser(Base):
     __tablename__ = "DeepliftUser"
 
-    userID = Column(Integer, primary_key=True, index=True)
+    userName = Column(String, primary_key=True, index=True)
     firstName = Column(String)
     lastName = Column(String)
     email = Column(String)
@@ -22,7 +22,7 @@ class Workout(Base):
     __tablename__ = "Workout"
 
     workoutID = Column(Integer, primary_key=True)
-    userID = Column(Integer, ForeignKey("DeepliftUser.userID"))
+    userName = Column(String, ForeignKey("DeepliftUser.userName"))
     reps = Column(Integer)
     weight = Column(Integer)
     exerciseID = Column(Integer, ForeignKey("Exercise.exerciseID"))

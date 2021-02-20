@@ -9,12 +9,12 @@ from datetime import date
 
 # Query the DeepliftUser table and return a list of First and Last Names of all users in DB
 def get_user_names(db: Session):
-    return db.query(models.DeepliftUser.userID, models.DeepliftUser.firstName, models.DeepliftUser.lastName).all()
+    return db.query(models.DeepliftUser.userName, models.DeepliftUser.firstName, models.DeepliftUser.lastName).all()
 
 
-# Query the DeeplistUser table and return all information for a specific userID
-def get_user_profile(db: Session, user_id: int):
-    return db.query(models.DeepliftUser).filter(models.DeepliftUser.userID == user_id).first()
+# Query the DeeplistUser table and return all information for a specific userName
+def get_user_profile(db: Session, user_name: str):
+    return db.query(models.DeepliftUser).filter(models.DeepliftUser.userName == user_name).first()
 
 # -----------------------------------------------------------------------------------------------------
 # /workouts
@@ -34,9 +34,9 @@ def get_workout(db: Session, workout_id: int):
 
 
 # Query the Workout table and get all workouts for a specific userID
-def get_user_workouts(db: Session, user_id: int):
+def get_user_workouts(db: Session, user_name: str):
     out = db.query(models.Workout).filter(
-        models.Workout.userID == user_id
+        models.Workout.userName == user_name
     ).join(
         models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
     ).all()
@@ -47,9 +47,9 @@ def get_user_workouts(db: Session, user_id: int):
     return out
 
 # Query the Workout table and get all workouts for a specific userID and exercise_id
-def get_user_ex_wo(db: Session, user_id: int, ex_id: int):
+def get_user_ex_wo(db: Session, user_name: str, ex_id: int):
     out = db.query(models.Workout).filter(
-        models.Workout.userID == user_id
+        models.Workout.userName == user_name
     ).filter(
         models.Workout.exerciseID == ex_id
     ).join(
@@ -63,9 +63,9 @@ def get_user_ex_wo(db: Session, user_id: int, ex_id: int):
 
 
 # Query the Workout table and get all workouts for a specific userID and exercise_id
-def get_user_date_wo(db: Session, user_id: int, date_recorded: str):
+def get_user_date_wo(db: Session, user_name: str, date_recorded: str):
     out = db.query(models.Workout).filter(
-        models.Workout.userID == user_id
+        models.Workout.userName == user_name
     ).filter(
         models.Workout.dateRecorded == date_recorded
     ).join(
