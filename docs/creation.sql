@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS Exercise;
 
 # A table representing a user of our application
 CREATE TABLE DeepliftUser (
-userID INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+userName VARCHAR(50) NOT NULL PRIMARY KEY,
 firstName VARCHAR(50) NOT NULL,
 lastName VARCHAR(50) NOT NULL,
 email VARCHAR(50) NOT NULL UNIQUE,
@@ -27,7 +27,7 @@ exerciseName VARCHAR(25) NOT NULL UNIQUE
 # A table representing a user's set (1)
 CREATE TABLE Workout (
 workoutID INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-userID INT NOT NULL,
+userName VARCHAR(50) NOT NULL,
 reps INT NOT NULL,
 weight INT NOT NULL,
 exerciseID INT NOT NULL,
@@ -37,5 +37,5 @@ CHECK (difficulty > 0 AND difficulty <= 10),
 CHECK (reps > 0),
 CHECK (weight > 0),
 FOREIGN KEY (exerciseID) REFERENCES Exercise(exerciseID) ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (userID) REFERENCES DeepliftUser(userID) ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY (userName) REFERENCES DeepliftUser(userName) ON DELETE CASCADE ON UPDATE CASCADE
 );
