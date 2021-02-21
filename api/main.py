@@ -52,8 +52,7 @@ def get_user_profile(user_name: str, db: Session = Depends(get_db)):
 
 # [POST] Create a new user
 # USES: Create new user on sign-up
-#@app.post("/users", dependencies=[Depends(JWTBearer())], response_model=schemas.user.DeepliftUserCreate)
-@app.post("/users", response_model=schemas.user.DeepliftUserCreate)
+@app.post("/users", dependencies=[Depends(JWTBearer())], response_model=schemas.user.DeepliftUserCreate)
 def create_user(user: schemas.user.DeepliftUserCreate, db: Session = Depends(get_db)):
     if crud.user_email_exists(db, email=user.email):
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -107,8 +106,7 @@ def get_user_date_wo(user_name: str, date_recorded: str, db: Session = Depends(g
 
 # [POST] Create a new workout
 # USES: Create new workout
-#@app.post("/users", dependencies=[Depends(JWTBearer())], response_model=schemas.user.DeepliftUserCreate)
-@app.post("/workouts/{user_name}", response_model=schemas.workout.WorkoutCreate)
+@app.post("/workouts/{user_name}", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutCreate)
 def create_workout(user_name: str, workout: schemas.workout.WorkoutCreate, db: Session = Depends(get_db)):
     return crud.create_workout(db=db, user_name=user_name, workout=workout)
 
