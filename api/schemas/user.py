@@ -8,24 +8,20 @@ from datetime import date
 
 
 class DeepliftUserBase(BaseModel):
+    userName: str
     firstName: str
     lastName: str
-
-# -------------------------------------------------------------------------------------------------------
-# [GET]
-
-
-# Model for UserNames. Stores First and Last Name for a user
-class DeepliftUserNames(DeepliftUserBase):
-    userID: int
 
     # Allow for lists
     class Config:
         orm_mode = True
 
+# -------------------------------------------------------------------------------------------------------
+# [GET]
+
 
 # Model for a UserProfile. Stores all user information in DeepliftUser table
-class DeepliftUserProfile(DeepliftUserNames):
+class DeepliftUserProfile(DeepliftUserBase):
     bodyweight: int
     age: int
     dateJoined: date
@@ -36,6 +32,6 @@ class DeepliftUserProfile(DeepliftUserNames):
 
 
 class DeepliftUserCreate(DeepliftUserBase):
-    email: str
     bodyweight: int
     age: int
+    email: str
