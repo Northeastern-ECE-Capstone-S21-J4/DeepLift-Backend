@@ -10,17 +10,13 @@ jobs:
           name: Deploy
           command: |
             #Download the zip
-            curl "https://github.com/Northeastern-ECE-Capstone-S21-J4/DeepLift-Backend/archive/main.zip" -o "DeepLift-Backend-main.zip"
+            ls
             #Copy zip to server
-            scp -o StrictHostKeyChecking=no DeepLift-Backend-main.zip ubuntu@ec2-54-88-114-180.compute-1.amazonaws.com:~/DeepLift-Backend-main.zip
+            #scp -o StrictHostKeyChecking=no DeepLift-Backend-main.zip ubuntu@ec2-54-88-114-180.compute-1.amazonaws.com:~/DeepLift-Backend-main.zip
             #SSH in and run the deploy script
-            ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-88-114-180.compute-1.amazonaws.com "(&>/home/ubuntu/deploy.log /home/ubuntu/deploy.sh &)"
-
+            #ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-88-114-180.compute-1.amazonaws.com "(&>/home/ubuntu/deploy.log /home/ubuntu/deploy.sh &)"
 
 workflows:
   main:
     jobs:
-      - deploy:
-        filters:
-          branches:
-              only: main
+      - deploy
