@@ -9,14 +9,19 @@ jobs:
       - run:
           name: Deploy
           command: |
-            #Download the zip
-            ls
+            #Package the zip
+            cd ..
+            mv project DeepLift-Backend-main
+            zip -r DeepLift-Backend-main.zip DeepLift-Backend-main
             #Copy zip to server
-            #scp -o StrictHostKeyChecking=no DeepLift-Backend-main.zip ubuntu@ec2-54-88-114-180.compute-1.amazonaws.com:~/DeepLift-Backend-main.zip
-            #SSH in and run the deploy script
-            #ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-88-114-180.compute-1.amazonaws.com "(&>/home/ubuntu/deploy.log /home/ubuntu/deploy.sh &)"
+            scp -o StrictHostKeyChecking=no DeepLift-Backend-main.zip ubuntu@ec2-54-88-114-180.compute-1.amazonaws.com:~/DeepLift-Backend-main.zip
+            #Run deploy script over ssh
+            ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-88-114-180.compute-1.amazonaws.com "(&>/home/ubuntu/deploy.log /home/ubuntu/deploy.sh &)"
 
 workflows:
   main:
     jobs:
-      - deploy
+      - deploy:
+        filters:
+          branches:
+            only: main
