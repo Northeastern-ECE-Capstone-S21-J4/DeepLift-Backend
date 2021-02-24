@@ -1,0 +1,27 @@
+version: 2.1
+
+jobs:
+  deploy:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - run:
+          name: Deploy
+          command: |
+            #Package the zip
+            cd ..
+            mv project DeepLift-Backend-main
+            zip -r DeepLift-Backend-main.zip DeepLift-Backend-main
+            #Copy zip to server
+            scp -o StrictHostKeyChecking=no DeepLift-Backend-main.zip ubuntu@ec2-54-88-114-180.compute-1.amazonaws.com:~/DeepLift-Backend-main.zip
+            #Run deploy script over ssh
+            ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-88-114-180.compute-1.amazonaws.com "(&>/home/ubuntu/deploy.log /home/ubuntu/deploy.sh &)"
+
+workflows:
+  main:
+    jobs:
+      - deploy:
+        filters:
+          branches:
+            only: main
