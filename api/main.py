@@ -151,7 +151,7 @@ def update_workout(workout: schemas.workout.WorkoutUpdate, db: Session = Depends
 # [DELETE] Delete a current Workout from the db
 # USES: Delete specific workout
 @app.delete("/workouts/delete/{workout_id}", dependencies=[Depends(JWTBearer())])
-def delete_user(workout_id: int, db: Session = Depends(get_db)):
+def delete_workout(workout_id: int, db: Session = Depends(get_db)):
     if not crud.workout_exists(db, workout_id):
         raise HTTPException(status_code=400, detail="Workout not in the DB!")
     crud.delete_workout(db=db, workout_id=workout_id)
