@@ -35,3 +35,11 @@ class DeepliftUserCreate(DeepliftUserBase):
     bodyweight: int
     age: int
     email: str
+
+# -------------------------------------------------------------------------------------------------------
+# [PUT]
+
+
+class DeepliftUserUpdate(DeepliftUserBase):
+    bodyweight: int
+    age: int
