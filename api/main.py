@@ -59,6 +59,7 @@ def get_user_profile(user_name: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
+
 # [POST] Create a new user
 # USES: Create new user on sign-up
 @app.post("/users", dependencies=[Depends(JWTBearer())], response_model=schemas.user.DeepliftUserCreate)
@@ -69,6 +70,24 @@ def create_user(user: schemas.user.DeepliftUserCreate, db: Session = Depends(get
         raise HTTPException(status_code=400, detail="Username already registered")
     return crud.create_user(db=db, user=user)
 
+
+# [PUT] Update a current User's profile information
+# USES: Update User information from profile page
+@app.put("/users/update", dependencies=[Depends(JWTBearer())], response_model=schemas.user.DeepliftUserProfile)
+def update_user(user: schemas.user.DeepliftUserUpdate, db: Session = Depends(get_db)):
+    if not crud.user_username_exists(db, user.userName):
+        raise HTTPException(status_code=400, detail="Username not registered!")
+    return crud.update_user(db=db, user=user)
+
+
+# [DELETE] Delete a current User from the db
+# USES: Delete account
+@app.delete("/users/delete/{user_name}", dependencies=[Depends(JWTBearer())])
+def delete_user(user_name: str, db: Session = Depends(get_db)):
+    if not crud.user_username_exists(db, user_name):
+        raise HTTPException(status_code=400, detail="Username not registered!")
+    crud.delete_user(db=db, user_name=user_name)
+    return str(not crud.user_username_exists(db, user_name))
 # -----------------------------------------------------------------------------------------------------
 # /workouts
 
@@ -115,9 +134,28 @@ def get_user_date_wo(user_name: str, date_recorded: str, db: Session = Depends(g
 
 # [POST] Create a new workout
 # USES: Create new workout
-@app.post("/workouts/{user_name}", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutCreate)
-def create_workout(user_name: str, workout: schemas.workout.WorkoutCreate, db: Session = Depends(get_db)):
-    return crud.create_workout(db=db, user_name=user_name, workout=workout)
+@app.post("/workouts", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutCreate)
+def create_workout(workout: schemas.workout.WorkoutCreate, db: Session = Depends(get_db)):
+    return crud.create_workout(db=db, workout=workout)
+
+
+# [PUT] Update a current Workout's information
+# USES: Edit a past Workout
+@app.put("/workouts/update", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutCreate)
+def update_workout(workout: schemas.workout.WorkoutUpdate, db: Session = Depends(get_db)):
+    if not crud.workout_exists(db, workout.workoutID):
+        raise HTTPException(status_code=400, detail="Workout doesn't exist!")
+    return crud.update_workout(db=db, workout=workout)
+
+
+# [DELETE] Delete a current Workout from the db
+# USES: Delete specific workout
+@app.delete("/workouts/delete/{workout_id}", dependencies=[Depends(JWTBearer())])
+def delete_user(workout_id: int, db: Session = Depends(get_db)):
+    if not crud.workout_exists(db, workout_id):
+        raise HTTPException(status_code=400, detail="Workout not in the DB!")
+    crud.delete_workout(db=db, workout_id=workout_id)
+    return str(not crud.workout_exists(db, workout_id))
 
 # -----------------------------------------------------------------------------------------------------
 # /exercises
@@ -130,25 +168,9 @@ def get_exercises(db: Session = Depends(get_db)):
     db_exercises = crud.get_exercises(db)
     return db_exercises
 
-
-# @app.get("/items/{item_id}")
-# def read_item(item_id: int, q: Optional[str] = None):
-#     return {"item_id": item_id, "q": q}
-#
-#
-# @app.post("/users", dependencies=[Depends(JWTBearer())], response_model=schemas.user.DeepliftUserCreate)
-# def create_user(user: schemas.user.DeepliftUserCreate, db: Session = Depends(get_db)):
-#     db_user = crud.get_user_by_email(db, email=user.email)
-#     if db_user:
-#         raise HTTPException(status_code=400, detail="Email already registered")
-#     return crud.create_user(db=db, user=user)
-#
-#
-# @app.post("/users/{user_id}/add_workout", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.Workout)
-# def add_workout(user_id: int, workout: schemas.workout.WorkoutCreate, db: Session = Depends(get_db)):
-#     return crud.create_workout(db=db, workout=workout, user_id=user_id)
 # -----------------------------------------------------------------------------------------------------
 # /token
+
 
 @app.get("/token/{user_name}/{user_pw}")
 def get_token(user_name: str, user_pw: str):

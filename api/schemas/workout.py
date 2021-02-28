@@ -11,6 +11,10 @@ class WorkoutBase(BaseModel):
     weight: int
     difficulty: int
 
+    # Allow for lists
+    class Config:
+        orm_mode = True
+
 # -------------------------------------------------------------------------------------------------------
 # [GET]
 
@@ -20,16 +24,19 @@ class Workout(WorkoutBase):
     exerciseName: str
     dateRecorded: date
 
-    class Config:
-        orm_mode = True
-
 # -------------------------------------------------------------------------------------------------------
 # [POST]
 
 
 class WorkoutCreate(WorkoutBase):
     exerciseID: int
+    userName: str
 
-    # Allow for lists
-    class Config:
-        orm_mode = True
+
+# -------------------------------------------------------------------------------------------------------
+# [PUT]
+
+
+class WorkoutUpdate(WorkoutBase):
+    exerciseID: int
+    workoutID: int
