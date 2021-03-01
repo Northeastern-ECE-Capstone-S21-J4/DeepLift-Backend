@@ -131,7 +131,6 @@ def get_user_date_wo(user_name: str, date_recorded: str, db: Session = Depends(g
         raise HTTPException(status_code=404, detail="User or User workouts not found")
     return db_user_workouts
 
-#yeet
 # [POST] Create a new workout
 # USES: Create new workout
 @app.post("/workouts", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutCreate)
