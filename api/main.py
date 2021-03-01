@@ -138,6 +138,7 @@ def create_workout(workout: schemas.workout.WorkoutCreate, db: Session = Depends
     return crud.create_workout(db=db, workout=workout)
 
 
+
 # [PUT] Update a current Workout's information
 # USES: Edit a past Workout
 @app.put("/workouts/update", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutCreate)
