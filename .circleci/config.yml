@@ -22,7 +22,7 @@ workflows:
   main:
     jobs:
       - deploy:
-        filters:
-          branches:
-            only:
-              - main
+          filters:
+            branches:
+              only:
+                - main
