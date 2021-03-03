@@ -9,6 +9,7 @@ from datetime import date
 
 class DeepliftUserBase(BaseModel):
     userName: str
+    pw: str
     firstName: str
     lastName: str
 
@@ -43,3 +44,7 @@ class DeepliftUserCreate(DeepliftUserBase):
 class DeepliftUserUpdate(DeepliftUserBase):
     bodyweight: int
     age: int
+
+class DeepliftUserLogin(BaseModel):
+    userName: str
+    pw: str
