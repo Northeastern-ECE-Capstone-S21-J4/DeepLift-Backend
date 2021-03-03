@@ -8,6 +8,7 @@ class DeepliftUser(Base):
     __tablename__ = "DeepliftUser"
 
     userName = Column(String, primary_key=True, index=True)
+    pw = Column(String)
     firstName = Column(String)
     lastName = Column(String)
     email = Column(String)
