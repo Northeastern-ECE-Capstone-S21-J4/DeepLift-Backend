@@ -19,10 +19,9 @@ jobs:
             ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-237-8-144.compute-1.amazonaws.com "(&>/home/ubuntu/deploy.log /home/ubuntu/deploy.sh &)"
 
 workflows:
-  main:
+  deploy:
     jobs:
       - deploy:
-        filters:
-          branches:
-            only:
-              - main
+          filters:
+            branches:
+              only: main
