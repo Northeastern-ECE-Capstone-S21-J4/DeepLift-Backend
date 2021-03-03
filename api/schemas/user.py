@@ -9,7 +9,6 @@ from datetime import date
 
 class DeepliftUserBase(BaseModel):
     userName: str
-    pw: str
     firstName: str
     lastName: str
 
