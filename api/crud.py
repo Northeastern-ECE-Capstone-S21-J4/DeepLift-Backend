@@ -2,6 +2,11 @@ from sqlalchemy.orm import Session, load_only
 import models
 import schemas.user, schemas.workout, schemas.exercise
 from datetime import date
+import os
+
+# -----------------------------------------------------------------------------------------------------
+# CONSTANTS
+S3_PATH = 'arn:aws:s3:us-east-1:176944131608:accesspoint/video-access'
 
 # -----------------------------------------------------------------------------------------------------
 # /users
@@ -52,6 +57,18 @@ def delete_user(db: Session, user_name: str):
     db.commit()
     return user_instance
 
+
+# Get information that the mirror needs to link a workout to a user
+def get_mirror_info(db: Session, user_name: str):
+    workout_id = get_next_workout_id(db)
+    vp, kp, ap = get_bucket_paths(workout_id=workout_id)
+    out = {'username': user_name,
+           'workoutID': workout_id,
+           'video_path': vp,
+           'keypoints_path': kp,
+           'analytics_path': ap}
+    return out
+
 # -----------------------------------------------------------------------------------------------------
 # /workouts
 
@@ -64,7 +81,7 @@ def get_workout(db: Session, workout_id: int):
         models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
     ).first()
 
-    out.exerciseName = out.exercise.exerciseName
+    add_workout_fields(workout=out)
 
     return out
 
@@ -77,8 +94,8 @@ def get_user_workouts(db: Session, user_name: str):
         models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
     ).all()
 
-    for e, i in enumerate(out):
-        out[e].exerciseName = i.exercise.exerciseName
+    for i in range(len(out)):
+        add_workout_fields(workout=out[i])
 
     return out
 
@@ -93,8 +110,8 @@ def get_user_ex_wo(db: Session, user_name: str, ex_id: int):
         models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
     ).all()
 
-    for e, i in enumerate(out):
-        out[e].exerciseName = i.exercise.exerciseName
+    for i in range(len(out)):
+        add_workout_fields(workout=out[i])
 
     return out
 
@@ -109,8 +126,8 @@ def get_user_date_wo(db: Session, user_name: str, date_recorded: str):
         models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
     ).all()
 
-    for e, i in enumerate(out):
-        out[e].exerciseName = i.exercise.exerciseName
+    for i in range(len(out)):
+        add_workout_fields(workout=out[i])
 
     return out
 
@@ -160,6 +177,24 @@ def get_exercises(db: Session):
 # Helper Functions
 
 
+# Get the paths to information stored in s3
+def get_bucket_paths(workout_id: int):
+    workout_path = os.path.join(S3_PATH, str(workout_id))
+    video_path = os.path.join(workout_path, 'video.mp4')
+    keypoints_path = os.path.join(workout_path, 'keypoints.json')
+    analytics_path = os.path.join(workout_path, 'analytics.json')
+
+    return video_path, keypoints_path, analytics_path
+
+# Add hardcoded fields and exerciseName to the return
+def add_workout_fields(workout):
+    workout.exerciseName = workout.exercise.exerciseName
+    vp, kp, ap = get_bucket_paths(workout_id=workout.workoutID)
+    workout.video_path = vp
+    workout.keypoints_path = kp
+    workout.analytics_path = ap
+
+
 # Check if a user with the given email exists in the database
 def user_email_exists(db: Session, email: str):
     user = db.query(models.DeepliftUser.userName).filter(
@@ -185,3 +220,9 @@ def workout_exists(db: Session, workoutID: int):
     ).first()
 
     return workout is not None
+
+
+# Get the next available workoutID based off the Workout table
+def get_next_workout_id(db: Session):
+    workout_id = db.query(models.Workout.workoutID).order_by(models.Workout.workoutID.desc()).first()
+    return workout_id[0] + 1
