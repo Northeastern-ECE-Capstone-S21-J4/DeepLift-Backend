@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,7 +9,9 @@ import models
 import schemas.user, schemas.workout, schemas.exercise
 from database import SessionLocal, engine
 
-from auth import signJWT, check_pw, JWTBearer
+from auth import signJWT, JWTBearer
+
+import hashlib
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -172,9 +174,8 @@ def get_exercises(db: Session = Depends(get_db)):
 # /token
 
 
-@app.get("/token/{user_name}/{user_pw}")
-def get_token(user_name: str, user_pw: str):
-    if check_pw(user_name, user_pw):
-        return signJWT(user_name)
-
-    return {"error": "Invalid credentials"}
+@app.post("/login")
+async def login(login_payload: schemas.user.DeepliftUserLogin, db: Session = Depends(get_db)):
+    if(login_payload.pw == crud.get_user_password(db, login_payload.userName)[0].lower()):
+        return signJWT(login_payload.userName)
+    return {"Error": "Invalid credentials"}
