@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import crud
 import models
-import schemas.user, schemas.workout, schemas.exercise
+import schemas.user, schemas.workout, schemas.exercise, schemas.mirror
 from database import SessionLocal, engine
 
 from auth import signJWT, JWTBearer
@@ -90,6 +90,17 @@ def delete_user(user_name: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username not registered!")
     crud.delete_user(db=db, user_name=user_name)
     return str(not crud.user_username_exists(db, user_name))
+
+
+# [GET] Get information a user needs to link with the mirror
+# USES: Called when the User shows their QR code to the mirror
+@app.get("/users/{user_name}/mirror", response_model=schemas.mirror.MirrorBase)
+def get_mirror_info(user_name: str, db: Session = Depends(get_db)):
+    if not crud.user_username_exists(db, user_name):
+        raise HTTPException(status_code=400, detail="Username not registered!")
+    mirror_info = crud.get_mirror_info(db=db, user_name=user_name)
+    return mirror_info
+
 # -----------------------------------------------------------------------------------------------------
 # /workouts
 
