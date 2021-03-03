@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS Exercise;
 # A table representing a user of our application
 CREATE TABLE DeepliftUser (
 userName VARCHAR(50) NOT NULL PRIMARY KEY,
+pw CHAR(64) NOT NULL,
 firstName VARCHAR(50) NOT NULL,
 lastName VARCHAR(50) NOT NULL,
 email VARCHAR(50) NOT NULL UNIQUE,
