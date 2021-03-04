@@ -171,11 +171,9 @@ def get_exercises(db: Session = Depends(get_db)):
     return db_exercises
 
 # -----------------------------------------------------------------------------------------------------
-# /token
-
-
+# /login
 @app.post("/login")
 async def login(login_payload: schemas.user.DeepliftUserLogin, db: Session = Depends(get_db)):
     if(login_payload.pw == crud.get_user_password(db, login_payload.userName)[0].lower()):
         return signJWT(login_payload.userName)
-    return {"Error": "Invalid credentials"}
+    raise HTTPException(status_code=403, detail="Invalid credentials")
