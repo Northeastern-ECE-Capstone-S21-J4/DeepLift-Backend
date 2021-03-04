@@ -43,3 +43,7 @@ class DeepliftUserCreate(DeepliftUserBase):
 class DeepliftUserUpdate(DeepliftUserBase):
     bodyweight: int
     age: int
+
+class DeepliftUserLogin(BaseModel):
+    userName: str
+    pw: str

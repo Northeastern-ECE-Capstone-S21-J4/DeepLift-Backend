@@ -22,6 +22,7 @@ def create_user(db: Session, user: schemas.user.DeepliftUserCreate):
     join_date = date.today().isoformat()
     db_user = models.DeepliftUser(
         userName=user.userName,
+        pw=user.pw,
         email=user.email,
         firstName=user.firstName,
         lastName=user.lastName,
@@ -32,6 +33,9 @@ def create_user(db: Session, user: schemas.user.DeepliftUserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def get_user_password(db: Session, user_name: str):
+    return db.query(models.DeepliftUser.pw).filter(models.DeepliftUser.userName == user_name).first()
 
 
 # Update a User with the new information

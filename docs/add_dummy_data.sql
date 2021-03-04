@@ -1,9 +1,9 @@
 USE deeplift;
 
-INSERT INTO DeepliftUser (userName, firstName, lastName, email, bodyweight, age, dateJoined) VALUES
-('joemama', 'Joe', 'Mama', 'joewho@gmail.com', 180, 21, '2021-02-4'),
-('skinnymike', 'Skinny', 'Mike', 'twig@hotmail.com', 23, 18, '2021-02-4'),
-('bigjohn', 'Big', 'John', 'massiveguy@gmail.com', 645, 37, '2021-02-4');
+INSERT INTO DeepliftUser (userName, pw, firstName, lastName, email, bodyweight, age, dateJoined) VALUES
+('joemama', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', 'Joe', 'Mama', 'joewho@gmail.com', 180, 21, '2021-02-4'),
+('skinnymike', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', 'Skinny', 'Mike', 'twig@hotmail.com', 23, 18, '2021-02-4'),
+('bigjohn', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', 'Big', 'John', 'massiveguy@gmail.com', 645, 37, '2021-02-4');
 
 INSERT INTO Exercise (exerciseName) VALUES
 ('Squat'),
