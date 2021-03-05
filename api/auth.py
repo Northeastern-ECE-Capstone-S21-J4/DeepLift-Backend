@@ -10,14 +10,6 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 JWT_SECRET = config("secret")
 JWT_ALGORITHM = "HS256"
 
-
-def check_pw(user_name, user_pw):
-    pw = config(user_name)
-    if(user_pw == pw):
-        return True
-    return False
-
-
 def token_response(token: str):
     return {
         "access_token": token
