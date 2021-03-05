@@ -174,6 +174,6 @@ def get_exercises(db: Session = Depends(get_db)):
 # /login
 @app.post("/login")
 async def login(login_payload: schemas.user.DeepliftUserLogin, db: Session = Depends(get_db)):
-    if(login_payload.pw == crud.get_user_password(db, login_payload.userName)[0].lower()):
+    if(hashlib.sha256(login_payload.pw.encode('utf-8')).hexdigest() == crud.get_user_password(db, login_payload.userName)[0].lower()):
         return signJWT(login_payload.userName)
     raise HTTPException(status_code=403, detail="Invalid credentials")
