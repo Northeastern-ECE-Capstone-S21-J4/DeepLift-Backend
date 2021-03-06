@@ -31,15 +31,34 @@ class Workout(WorkoutBase):
 # [POST]
 
 
-class WorkoutCreate(WorkoutBase):
-    exerciseID: int
+class WorkoutCreate(BaseModel):
     userName: str
+    exerciseID: int
+    reps: int
+    weight: int
 
+
+class WorkoutReturn(BaseModel):
+    video_path: str
+    keypoints_path: str
+    analytics_path: str
 
 # -------------------------------------------------------------------------------------------------------
 # [PUT]
 
 
-class WorkoutUpdate(WorkoutBase):
-    exerciseID: int
+class WorkoutUpdate(BaseModel):
     workoutID: int
+    difficulty: int
+    weight: int
+
+
+class LatestUpdate(BaseModel):
+    user_name: str
+    difficulty: int
+
+
+class WorkoutUpdateReturn(WorkoutBase):
+    workoutID: int
+    userName: str
+    exerciseID: int

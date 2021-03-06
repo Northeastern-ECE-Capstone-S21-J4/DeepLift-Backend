@@ -26,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+
 # Dependency
 def get_db():
     db = SessionLocal()
@@ -147,18 +148,24 @@ def get_user_date_wo(user_name: str, date_recorded: str, db: Session = Depends(g
 
 # [POST] Create a new workout
 # USES: Create new workout
-@app.post("/workouts", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutCreate)
+@app.post("/workouts", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutReturn)
 def create_workout(workout: schemas.workout.WorkoutCreate, db: Session = Depends(get_db)):
     return crud.create_workout(db=db, workout=workout)
 
 
 # [PUT] Update a current Workout's information
 # USES: Edit a past Workout
-@app.put("/workouts/update", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutCreate)
+@app.put("/workouts/update", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutUpdateReturn)
 def update_workout(workout: schemas.workout.WorkoutUpdate, db: Session = Depends(get_db)):
     if not crud.workout_exists(db, workout.workoutID):
         raise HTTPException(status_code=400, detail="Workout doesn't exist!")
     return crud.update_workout(db=db, workout=workout)
+
+# [PUT] Update a the difficulty of the most recent workout
+# USES: Update difficulty once 'End Workout' is hit
+@app.put("/workouts/update/latest", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutUpdateReturn)
+def update_latest(data: schemas.workout.LatestUpdate, db: Session = Depends(get_db)):
+    return crud.update_latest(db=db, data=data)
 
 
 # [DELETE] Delete a current Workout from the db
@@ -168,7 +175,7 @@ def delete_workout(workout_id: int, db: Session = Depends(get_db)):
     if not crud.workout_exists(db, workout_id):
         raise HTTPException(status_code=400, detail="Workout not in the DB!")
     crud.delete_workout(db=db, workout_id=workout_id)
-    return str(not crud.workout_exists(db, workout_id))
+    return not crud.workout_exists(db, workout_id)
 
 # -----------------------------------------------------------------------------------------------------
 # /exercises

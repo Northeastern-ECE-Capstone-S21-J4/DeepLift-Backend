@@ -34,9 +34,11 @@ weight INT NOT NULL,
 exerciseID INT NOT NULL,
 dateRecorded DATE NOT NULL,
 difficulty INT NOT NULL,
-CHECK (difficulty > 0 AND difficulty <= 10),
+CHECK ((difficulty > 0 AND difficulty <= 10) OR difficulty = -1),
 CHECK (reps > 0),
-CHECK (weight > 0),
+CHECK ((weight > 0) OR weight IS NULL),
 FOREIGN KEY (exerciseID) REFERENCES Exercise(exerciseID) ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (userName) REFERENCES DeepliftUser(userName) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+select * from deeplift.Workout;
