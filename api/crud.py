@@ -139,7 +139,7 @@ def create_workout(db: Session, workout: schemas.workout.WorkoutCreate):
     db.commit()
     db.refresh(db_workout)
     vp, kp, ap = get_bucket_paths(db_workout.workoutID)
-    return {'video_path': vp, 'keypoints_path': kp, 'analytics_path': ap}
+    return {'video_path': vp, 'keypoints_path': kp, 'analytics_path': ap, "workoutID": db_workout.workoutID}
 
 
 # Update a workout with the new information

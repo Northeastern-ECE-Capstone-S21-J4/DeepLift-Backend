@@ -42,6 +42,7 @@ class WorkoutReturn(BaseModel):
     video_path: str
     keypoints_path: str
     analytics_path: str
+    workoutID: int
 
 # -------------------------------------------------------------------------------------------------------
 # [PUT]
