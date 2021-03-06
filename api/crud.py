@@ -58,18 +58,6 @@ def delete_user(db: Session, user_name: str):
     db.commit()
     return user_instance
 
-
-# Get information that the mirror needs to link a workout to a user
-def get_mirror_info(db: Session, user_name: str):
-    workout_id = get_next_workout_id(db)
-    vp, kp, ap = get_bucket_paths(workout_id=workout_id)
-    out = {'username': user_name,
-           'workoutID': workout_id,
-           'video_path': vp,
-           'keypoints_path': kp,
-           'analytics_path': ap}
-    return out
-
 # -----------------------------------------------------------------------------------------------------
 # /workouts
 
