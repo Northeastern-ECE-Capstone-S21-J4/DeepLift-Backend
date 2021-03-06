@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session, load_only
+from sqlalchemy import func, event, DDL
 import models
 import schemas.user, schemas.workout, schemas.exercise
 from datetime import date
@@ -141,20 +142,30 @@ def create_workout(db: Session, workout: schemas.workout.WorkoutCreate):
         weight=workout.weight,
         exerciseID=workout.exerciseID,
         dateRecorded=workout_date,
-        difficulty=workout.difficulty)
+        difficulty=-1)
     db.add(db_workout)
     db.commit()
     db.refresh(db_workout)
-    return db_workout
+    vp, kp, ap = get_bucket_paths(db_workout.workoutID)
+    return {'video_path': vp, 'keypoints_path': kp, 'analytics_path': ap}
 
 
 # Update a workout with the new information
-def update_workout(db: Session, workout: schemas.workout.WorkoutCreate):
+def update_workout(db: Session, workout: schemas.workout.WorkoutUpdate):
     workout_instance = get_workout(db, workout.workoutID)
-    workout_instance.exerciseID = workout.exerciseID
-    workout_instance.reps = workout.reps
     workout_instance.weight = workout.weight
     workout_instance.difficulty = workout.difficulty
+    db.commit()
+    return workout_instance
+
+
+# Update the most recent workout's difficulty
+def update_latest(db: Session, data: schemas.workout.LatestUpdate):
+    workout_instance = db.query(models.Workout).filter(
+        models.Workout.userName == data.user_name
+    ).order_by(models.Workout.workoutID.desc()).first()
+
+    workout_instance.difficulty = data.difficulty
     db.commit()
     return workout_instance
 
@@ -180,11 +191,12 @@ def get_exercises(db: Session):
 # Get the paths to information stored in s3
 def get_bucket_paths(workout_id: int):
     workout_path = os.path.join(S3_PATH, str(workout_id))
-    video_path = os.path.join(workout_path, 'video.mp4')
+    video_path = os.path.join(workout_path, 'video.avi')
     keypoints_path = os.path.join(workout_path, 'keypoints.json')
     analytics_path = os.path.join(workout_path, 'analytics.json')
 
     return video_path, keypoints_path, analytics_path
+
 
 # Add hardcoded fields and exerciseName to the return
 def add_workout_fields(workout):
@@ -220,9 +232,3 @@ def workout_exists(db: Session, workoutID: int):
     ).first()
 
     return workout is not None
-
-
-# Get the next available workoutID based off the Workout table
-def get_next_workout_id(db: Session):
-    workout_id = db.query(models.Workout.workoutID).order_by(models.Workout.workoutID.desc()).first()
-    return workout_id[0] + 1
