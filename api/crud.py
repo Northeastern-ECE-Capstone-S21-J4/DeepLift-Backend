@@ -47,6 +47,7 @@ def create_user(db: Session, user: schemas.user.DeepliftUserCreate):
     db.refresh(db_user)
     return db_user
 
+
 def get_user_password(db: Session, user_name: str):
     return db.query(models.DeepliftUser.pw).filter(models.DeepliftUser.userName == user_name).first()
 
@@ -60,6 +61,11 @@ def update_user(db: Session, user: schemas.user.DeepliftUserCreate):
     user_instance.age = user.age
     db.commit()
     return user_instance
+
+
+# Returns if a user is lifting and the difficulty
+def is_user_lifting(db: Session, user_name: str):
+    return db.query(models.UserLifting).filter(models.UserLifting.userName == user_name).first()
 
 
 # Delete a User
@@ -141,10 +147,17 @@ def create_workout(db: Session, workout: schemas.workout.WorkoutCreate):
         weight=workout.weight,
         exerciseID=workout.exerciseID,
         dateRecorded=workout_date,
-        difficulty=-1)
+        difficulty=workout.difficulty)
     db.add(db_workout)
     db.commit()
     db.refresh(db_workout)
+
+    user_lifting_instance = db.query(models.UserLifting).filter(
+        models.UserLifting.userName == workout.userName
+    ).first()
+    user_lifting_instance.difficulty = -1
+    db.commit()
+
     vp, kp, ap = get_bucket_paths(db_workout.workoutID)
     return {'video_path': vp, 'keypoints_path': kp, 'analytics_path': ap, "workoutID": db_workout.workoutID}
 
@@ -158,15 +171,27 @@ def update_workout(db: Session, workout: schemas.workout.WorkoutUpdate):
     return workout_instance
 
 
-# Update the most recent workout's difficulty
-def update_latest(db: Session, data: schemas.workout.LatestUpdate):
-    workout_instance = db.query(models.Workout).filter(
-        models.Workout.userName == data.user_name
-    ).order_by(models.Workout.workoutID.desc()).first()
+# Start a workout by changing UserLifting
+def start_workout(user_name:str, db: Session):
+    user_lifting_instance = db.query(models.UserLifting).filter(
+        models.UserLifting.userName == user_name
+    ).first()
 
-    workout_instance.difficulty = data.difficulty
+    user_lifting_instance.currentlyLifting = True
     db.commit()
-    return workout_instance
+    return True
+
+
+# Start a workout by changing UserLifting
+def end_workout(user_name: str, difficulty: int, db: Session):
+    user_lifting_instance = db.query(models.UserLifting).filter(
+        models.UserLifting.userName == user_name
+    ).first()
+
+    user_lifting_instance.currentlyLifting = False
+    user_lifting_instance.difficulty = difficulty
+    db.commit()
+    return True
 
 
 # Delete a Workout
