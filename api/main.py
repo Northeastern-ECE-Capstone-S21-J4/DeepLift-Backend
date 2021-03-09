@@ -151,6 +151,7 @@ def update_workout(workout: schemas.workout.WorkoutUpdate, db: Session = Depends
         raise HTTPException(status_code=400, detail="Workout doesn't exist!")
     return crud.update_workout(db=db, workout=workout)
 
+
 # [PUT] Update a the difficulty of the most recent workout
 # USES: Update difficulty once 'End Workout' is hit
 @app.put("/workouts/update/latest", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutUpdateReturn)

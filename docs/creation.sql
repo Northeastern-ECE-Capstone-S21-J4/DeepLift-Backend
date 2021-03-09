@@ -19,6 +19,14 @@ CHECK (bodyweight > 0),
 CHECK (age >= 18)
 );
 
+CREATE TABLE UserLifting (
+userName VARCHAR(50) NOT NULL PRIMARY KEY,
+currentlyLifting BOOLEAN NOT NULL,
+difficulty INT NOT NULL,
+CHECK ((difficulty > 0 AND difficulty <= 10) OR difficulty = -1),
+FOREIGN KEY (userName) REFERENCES DeepliftUser(userName) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 # A table representing an exercise that can be performed
 CREATE TABLE Exercise (
 exerciseID INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -40,5 +48,3 @@ CHECK ((weight > 0) OR weight IS NULL),
 FOREIGN KEY (exerciseID) REFERENCES Exercise(exerciseID) ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (userName) REFERENCES DeepliftUser(userName) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-select * from deeplift.Workout;

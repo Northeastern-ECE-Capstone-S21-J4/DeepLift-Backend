@@ -36,6 +36,7 @@ class WorkoutCreate(BaseModel):
     exerciseID: int
     reps: int
     weight: int
+    difficulty: int
 
 
 class WorkoutReturn(BaseModel):

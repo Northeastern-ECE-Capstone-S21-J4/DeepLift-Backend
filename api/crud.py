@@ -38,6 +38,13 @@ def create_user(db: Session, user: schemas.user.DeepliftUserCreate):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    db_user_lift = models.UserLifting(
+        userName=user.userName,
+        currentlyLifting=False,
+        difficulty=-1)
+    db.add(db_user_lift)
+    db.commit()
+    db.refresh(db_user)
     return db_user
 
 def get_user_password(db: Session, user_name: str):

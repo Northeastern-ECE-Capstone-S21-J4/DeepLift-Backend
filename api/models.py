@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Date
+from sqlalchemy import Column, ForeignKey, Integer, String, Date, Boolean
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -15,6 +15,14 @@ class DeepliftUser(Base):
     bodyweight = Column(Integer)
     age = Column(Integer)
     dateJoined = Column(Date)
+
+
+class UserLifting(Base):
+    __tablename__ = "UserLifting"
+
+    userName = Column(String, primary_key=True, index=True)
+    currentlyLifting = Column(Boolean)
+    difficulty = Column(Integer)
 
 
 class Workout(Base):
