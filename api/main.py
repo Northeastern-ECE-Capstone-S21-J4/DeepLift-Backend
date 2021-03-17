@@ -107,11 +107,8 @@ def delete_user(user_name: str, db: Session = Depends(get_db)):
         is_deleted.append(crud.delete_workout(workout_id=workout.workoutID, db=db))
         is_deleted.append(s3_bucket.delete_bucket(workout_id=workout.workoutID))
 
-    if not all(is_deleted):
-        return False
-
     crud.delete_user(db=db, user_name=user_name)
-    return not crud.user_username_exists(db, user_name)
+    return (not crud.user_username_exists(db, user_name)) and all(is_deleted)
 
 # -----------------------------------------------------------------------------------------------------
 # /workouts
