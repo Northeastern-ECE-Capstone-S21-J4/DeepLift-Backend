@@ -5,6 +5,11 @@ INSERT INTO DeepliftUser (userName, pw, firstName, lastName, email, bodyweight, 
 ('skinnymike', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', 'Skinny', 'Mike', 'twig@hotmail.com', 23, 18, '2021-02-4'),
 ('bigjohn', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', 'Big', 'John', 'massiveguy@gmail.com', 645, 37, '2021-02-4');
 
+INSERT INTO UserLifting (userName, currentlyLifting, difficulty) VALUES
+('joemama', FALSE, -1),
+('skinnymike', FALSE, -1),
+('bigjohn', FALSE, -1);
+
 INSERT INTO Exercise (exerciseName) VALUES
 ('Squat'),
 ('Bench'),
