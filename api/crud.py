@@ -4,6 +4,7 @@ import models
 import schemas.user, schemas.workout, schemas.exercise
 from datetime import date
 import os
+import hashlib
 
 # -----------------------------------------------------------------------------------------------------
 # CONSTANTS
@@ -28,7 +29,7 @@ def create_user(db: Session, user: schemas.user.DeepliftUserCreate):
     join_date = date.today().isoformat()
     db_user = models.DeepliftUser(
         userName=user.userName,
-        pw=user.pw,
+        pw=hashlib.sha256(user.pw.encode('utf-8')).hexdigest(),
         email=user.email,
         firstName=user.firstName,
         lastName=user.lastName,

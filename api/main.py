@@ -8,6 +8,7 @@ import crud
 import models
 import schemas.user, schemas.workout, schemas.exercise, schemas.mirror
 from database import SessionLocal, engine
+import s3_bucket
 
 from auth import signJWT, JWTBearer
 
@@ -99,8 +100,15 @@ def update_user(user: schemas.user.DeepliftUserUpdate, db: Session = Depends(get
 def delete_user(user_name: str, db: Session = Depends(get_db)):
     if not crud.user_username_exists(db, user_name):
         raise HTTPException(status_code=400, detail="Username not registered!")
+    user_workouts = crud.get_user_workouts(db, user_name=user_name)
+
+    is_deleted = []
+    for workout in user_workouts:
+        is_deleted.append(crud.delete_workout(workout_id=workout.workoutID, db=db))
+        is_deleted.append(s3_bucket.delete_bucket(workout_id=workout.workoutID))
+
     crud.delete_user(db=db, user_name=user_name)
-    return str(not crud.user_username_exists(db, user_name))
+    return (not crud.user_username_exists(db, user_name)) and all(is_deleted)
 
 # -----------------------------------------------------------------------------------------------------
 # /workouts
@@ -183,7 +191,8 @@ def delete_workout(workout_id: int, db: Session = Depends(get_db)):
     if not crud.workout_exists(db, workout_id):
         raise HTTPException(status_code=400, detail="Workout not in the DB!")
     crud.delete_workout(db=db, workout_id=workout_id)
-    return not crud.workout_exists(db, workout_id)
+    is_deleted = s3_bucket.delete_bucket(workout_id=workout_id)
+    return (not crud.workout_exists(db, workout_id)) and is_deleted
 
 # -----------------------------------------------------------------------------------------------------
 # /exercises
