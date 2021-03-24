@@ -23,5 +23,3 @@ uvicorn main:app --reload
 4. Test server by going to http://127.0.0.1:8000. You should see `{"Hello":"World"}` in your browser.
 
 5. To see the API docs, go to http://127.0.0.1:8000/redoc.  
-
-
