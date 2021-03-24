@@ -27,6 +27,15 @@ class DeepliftUserProfile(DeepliftUserBase):
     dateJoined: date
     email: str
 
+
+class CurrentlyLifting(BaseModel):
+    currentlyLifting: bool
+    difficulty: int
+
+    # Allow for lists
+    class Config:
+        orm_mode = True
+
 # -------------------------------------------------------------------------------------------------------
 # [POST]
 
@@ -35,6 +44,7 @@ class DeepliftUserCreate(DeepliftUserBase):
     bodyweight: int
     age: int
     email: str
+    pw: str
 
 # -------------------------------------------------------------------------------------------------------
 # [PUT]
@@ -43,6 +53,7 @@ class DeepliftUserCreate(DeepliftUserBase):
 class DeepliftUserUpdate(DeepliftUserBase):
     bodyweight: int
     age: int
+
 
 class DeepliftUserLogin(BaseModel):
     userName: str

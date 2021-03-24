@@ -6,8 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import crud
 import models
-import schemas.user, schemas.workout, schemas.exercise
+import schemas.user, schemas.workout, schemas.exercise, schemas.mirror
 from database import SessionLocal, engine
+import s3_bucket
 
 from auth import signJWT, JWTBearer
 
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
 
 # Dependency
 def get_db():
@@ -62,6 +64,16 @@ def get_user_profile(user_name: str, db: Session = Depends(get_db)):
     return db_user
 
 
+# [GET] Returns if a user is currently working out and the difficulty
+# USES: Lets the mirror know when to stop recording
+@app.get("/users/{user_name}/lifting", response_model=schemas.user.CurrentlyLifting)
+def is_user_lifting(user_name: str, db: Session = Depends(get_db)):
+    db_user = crud.get_user_profile(db, user_name=user_name)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return crud.is_user_lifting(db, user_name=user_name)
+
+
 # [POST] Create a new user
 # USES: Create new user on sign-up
 @app.post("/users", dependencies=[Depends(JWTBearer())], response_model=schemas.user.DeepliftUserCreate)
@@ -88,8 +100,16 @@ def update_user(user: schemas.user.DeepliftUserUpdate, db: Session = Depends(get
 def delete_user(user_name: str, db: Session = Depends(get_db)):
     if not crud.user_username_exists(db, user_name):
         raise HTTPException(status_code=400, detail="Username not registered!")
+    user_workouts = crud.get_user_workouts(db, user_name=user_name)
+
+    is_deleted = []
+    for workout in user_workouts:
+        is_deleted.append(crud.delete_workout(workout_id=workout.workoutID, db=db))
+        is_deleted.append(s3_bucket.delete_bucket(workout_id=workout.workoutID))
+
     crud.delete_user(db=db, user_name=user_name)
-    return str(not crud.user_username_exists(db, user_name))
+    return (not crud.user_username_exists(db, user_name)) and all(is_deleted)
+
 # -----------------------------------------------------------------------------------------------------
 # /workouts
 
@@ -136,18 +156,32 @@ def get_user_date_wo(user_name: str, date_recorded: str, db: Session = Depends(g
 
 # [POST] Create a new workout
 # USES: Create new workout
-@app.post("/workouts", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutCreate)
+@app.post("/workouts", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutReturn)
 def create_workout(workout: schemas.workout.WorkoutCreate, db: Session = Depends(get_db)):
     return crud.create_workout(db=db, workout=workout)
 
 
 # [PUT] Update a current Workout's information
 # USES: Edit a past Workout
-@app.put("/workouts/update", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutCreate)
+@app.put("/workouts/update", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutUpdateReturn)
 def update_workout(workout: schemas.workout.WorkoutUpdate, db: Session = Depends(get_db)):
     if not crud.workout_exists(db, workout.workoutID):
         raise HTTPException(status_code=400, detail="Workout doesn't exist!")
     return crud.update_workout(db=db, workout=workout)
+
+
+# [PUT] Start a workout by updating the UserLifting table
+# USES: Let the mirror know a workout has started
+@app.put("/workouts/user/{user_name}/start", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutUpdateReturn)
+def start_workout(user_name: str, db: Session = Depends(get_db)):
+    return crud.start_workout(db=db, user_name=user_name)
+
+
+# [PUT] End a workout by updating the UserLifting table
+# USES: Let the mirror know a workout has ended and give the difficulty
+@app.put("/workouts/user/{user_name}/end/{difficulty}", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutUpdateReturn)
+def end_workout(user_name: str, difficulty: int, db: Session = Depends(get_db)):
+    return crud.end_workout(db=db, user_name=user_name, difficulty=difficulty)
 
 
 # [DELETE] Delete a current Workout from the db
@@ -157,7 +191,8 @@ def delete_workout(workout_id: int, db: Session = Depends(get_db)):
     if not crud.workout_exists(db, workout_id):
         raise HTTPException(status_code=400, detail="Workout not in the DB!")
     crud.delete_workout(db=db, workout_id=workout_id)
-    return str(not crud.workout_exists(db, workout_id))
+    is_deleted = s3_bucket.delete_bucket(workout_id=workout_id)
+    return (not crud.workout_exists(db, workout_id)) and is_deleted
 
 # -----------------------------------------------------------------------------------------------------
 # /exercises

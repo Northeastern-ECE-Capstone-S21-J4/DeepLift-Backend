@@ -1,7 +1,14 @@
 from sqlalchemy.orm import Session, load_only
+from sqlalchemy import func, event, DDL
 import models
 import schemas.user, schemas.workout, schemas.exercise
 from datetime import date
+import os
+import hashlib
+
+# -----------------------------------------------------------------------------------------------------
+# CONSTANTS
+S3_PATH = 'arn:aws:s3:us-east-1:176944131608:accesspoint/video-access'
 
 # -----------------------------------------------------------------------------------------------------
 # /users
@@ -22,7 +29,7 @@ def create_user(db: Session, user: schemas.user.DeepliftUserCreate):
     join_date = date.today().isoformat()
     db_user = models.DeepliftUser(
         userName=user.userName,
-        pw=user.pw,
+        pw=hashlib.sha256(user.pw.encode('utf-8')).hexdigest(),
         email=user.email,
         firstName=user.firstName,
         lastName=user.lastName,
@@ -32,7 +39,15 @@ def create_user(db: Session, user: schemas.user.DeepliftUserCreate):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    db_user_lift = models.UserLifting(
+        userName=user.userName,
+        currentlyLifting=False,
+        difficulty=-1)
+    db.add(db_user_lift)
+    db.commit()
+    db.refresh(db_user)
     return db_user
+
 
 def get_user_password(db: Session, user_name: str):
     return db.query(models.DeepliftUser.pw).filter(models.DeepliftUser.userName == user_name).first()
@@ -47,6 +62,11 @@ def update_user(db: Session, user: schemas.user.DeepliftUserCreate):
     user_instance.age = user.age
     db.commit()
     return user_instance
+
+
+# Returns if a user is lifting and the difficulty
+def is_user_lifting(db: Session, user_name: str):
+    return db.query(models.UserLifting).filter(models.UserLifting.userName == user_name).first()
 
 
 # Delete a User
@@ -68,7 +88,7 @@ def get_workout(db: Session, workout_id: int):
         models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
     ).first()
 
-    out.exerciseName = out.exercise.exerciseName
+    add_workout_fields(workout=out)
 
     return out
 
@@ -81,8 +101,8 @@ def get_user_workouts(db: Session, user_name: str):
         models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
     ).all()
 
-    for e, i in enumerate(out):
-        out[e].exerciseName = i.exercise.exerciseName
+    for i in range(len(out)):
+        add_workout_fields(workout=out[i])
 
     return out
 
@@ -97,8 +117,8 @@ def get_user_ex_wo(db: Session, user_name: str, ex_id: int):
         models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
     ).all()
 
-    for e, i in enumerate(out):
-        out[e].exerciseName = i.exercise.exerciseName
+    for i in range(len(out)):
+        add_workout_fields(workout=out[i])
 
     return out
 
@@ -113,8 +133,8 @@ def get_user_date_wo(db: Session, user_name: str, date_recorded: str):
         models.Exercise, models.Workout.exerciseID == models.Exercise.exerciseID
     ).all()
 
-    for e, i in enumerate(out):
-        out[e].exerciseName = i.exercise.exerciseName
+    for i in range(len(out)):
+        add_workout_fields(workout=out[i])
 
     return out
 
@@ -132,18 +152,47 @@ def create_workout(db: Session, workout: schemas.workout.WorkoutCreate):
     db.add(db_workout)
     db.commit()
     db.refresh(db_workout)
-    return db_workout
+
+    user_lifting_instance = db.query(models.UserLifting).filter(
+        models.UserLifting.userName == workout.userName
+    ).first()
+    user_lifting_instance.difficulty = -1
+    db.commit()
+
+    vp, kp, ap = get_bucket_paths(db_workout.workoutID)
+    return {'video_path': vp, 'keypoints_path': kp, 'analytics_path': ap, "workoutID": db_workout.workoutID}
 
 
 # Update a workout with the new information
-def update_workout(db: Session, workout: schemas.workout.WorkoutCreate):
+def update_workout(db: Session, workout: schemas.workout.WorkoutUpdate):
     workout_instance = get_workout(db, workout.workoutID)
-    workout_instance.exerciseID = workout.exerciseID
-    workout_instance.reps = workout.reps
     workout_instance.weight = workout.weight
     workout_instance.difficulty = workout.difficulty
     db.commit()
     return workout_instance
+
+
+# Start a workout by changing UserLifting
+def start_workout(user_name:str, db: Session):
+    user_lifting_instance = db.query(models.UserLifting).filter(
+        models.UserLifting.userName == user_name
+    ).first()
+
+    user_lifting_instance.currentlyLifting = True
+    db.commit()
+    return True
+
+
+# Start a workout by changing UserLifting
+def end_workout(user_name: str, difficulty: int, db: Session):
+    user_lifting_instance = db.query(models.UserLifting).filter(
+        models.UserLifting.userName == user_name
+    ).first()
+
+    user_lifting_instance.currentlyLifting = False
+    user_lifting_instance.difficulty = difficulty
+    db.commit()
+    return True
 
 
 # Delete a Workout
@@ -162,6 +211,25 @@ def get_exercises(db: Session):
 
 # -----------------------------------------------------------------------------------------------------
 # Helper Functions
+
+
+# Get the paths to information stored in s3
+def get_bucket_paths(workout_id: int):
+    workout_path = os.path.join(S3_PATH, str(workout_id))
+    video_path = os.path.join(workout_path, 'video.avi')
+    keypoints_path = os.path.join(workout_path, 'keypoints.json')
+    analytics_path = os.path.join(workout_path, 'analytics.json')
+
+    return video_path, keypoints_path, analytics_path
+
+
+# Add hardcoded fields and exerciseName to the return
+def add_workout_fields(workout):
+    workout.exerciseName = workout.exercise.exerciseName
+    vp, kp, ap = get_bucket_paths(workout_id=workout.workoutID)
+    workout.video_path = vp
+    workout.keypoints_path = kp
+    workout.analytics_path = ap
 
 
 # Check if a user with the given email exists in the database
