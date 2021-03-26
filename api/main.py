@@ -76,7 +76,7 @@ def is_user_lifting(user_name: str, db: Session = Depends(get_db)):
 
 # [POST] Create a new user
 # USES: Create new user on sign-up
-@app.post("/users", dependencies=[Depends(JWTBearer())], response_model=schemas.user.DeepliftUserCreate)
+@app.post("/users", response_model=schemas.user.DeepliftUserCreate)
 def create_user(user: schemas.user.DeepliftUserCreate, db: Session = Depends(get_db)):
     if crud.user_email_exists(db, email=user.email):
         raise HTTPException(status_code=400, detail="Email already registered")
