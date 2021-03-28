@@ -172,14 +172,14 @@ def update_workout(workout: schemas.workout.WorkoutUpdate, db: Session = Depends
 
 # [PUT] Start a workout by updating the UserLifting table
 # USES: Let the mirror know a workout has started
-@app.put("/workouts/user/{user_name}/start", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutUpdateReturn)
+@app.put("/workouts/user/{user_name}/start", dependencies=[Depends(JWTBearer())])
 def start_workout(user_name: str, db: Session = Depends(get_db)):
     return crud.start_workout(db=db, user_name=user_name)
 
 
 # [PUT] End a workout by updating the UserLifting table
 # USES: Let the mirror know a workout has ended and give the difficulty
-@app.put("/workouts/user/{user_name}/end/{difficulty}", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutUpdateReturn)
+@app.put("/workouts/user/{user_name}/end/{difficulty}", dependencies=[Depends(JWTBearer())])
 def end_workout(user_name: str, difficulty: int, db: Session = Depends(get_db)):
     return crud.end_workout(db=db, user_name=user_name, difficulty=difficulty)
 
