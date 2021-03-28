@@ -159,8 +159,8 @@ def create_workout(db: Session, workout: schemas.workout.WorkoutCreate):
     user_lifting_instance.difficulty = -1
     db.commit()
 
-    vp, kp, ap = get_bucket_paths(db_workout.workoutID)
-    return {'video_with_path': vp, 'video_without_path': kp, 'analytics_path': ap}
+    vwp, vwop = get_bucket_paths(db_workout.workoutID)
+    return {'video_with_path': vwp, 'video_without_path': vwop}
 
 
 # Update a workout with the new information
@@ -215,20 +215,18 @@ def get_exercises(db: Session):
 
 # Get the paths to information stored in s3
 def get_bucket_paths(workout_id: int):
-    video_path = os.path.join(str(workout_id), 'video_with.mp4')
-    keypoints_path = os.path.join(str(workout_id), 'video_without.mp4')
-    analytics_path = os.path.join(str(workout_id), 'analytics.json')
+    video_with_path = os.path.join(str(workout_id), 'video_with.mp4')
+    video_without_path = os.path.join(str(workout_id), 'video_without.mp4')
 
-    return video_path, keypoints_path, analytics_path
+    return video_with_path, video_without_path
 
 
 # Add hardcoded fields and exerciseName to the return
 def add_workout_fields(workout):
     workout.exerciseName = workout.exercise.exerciseName
-    vp, kp, ap = get_bucket_paths(workout_id=workout.workoutID)
-    workout.video_path = vp
-    workout.keypoints_path = kp
-    workout.analytics_path = ap
+    vwp, vwop, ap = get_bucket_paths(workout_id=workout.workoutID)
+    workout.video_with_path = vwp
+    workout.video_without_path = vwop
 
 
 # Check if a user with the given email exists in the database
