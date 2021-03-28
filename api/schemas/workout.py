@@ -42,7 +42,6 @@ class WorkoutCreate(BaseModel):
 class WorkoutReturn(BaseModel):
     video_with_path: str
     video_without_path: str
-    analytics_path: str
 
 # -------------------------------------------------------------------------------------------------------
 # [PUT]
