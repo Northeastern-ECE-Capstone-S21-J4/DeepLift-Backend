@@ -172,7 +172,7 @@ def update_workout(workout: schemas.workout.WorkoutUpdate, db: Session = Depends
 
 # [PUT] Start a workout by updating the UserLifting table
 # USES: Let the mirror know a workout has started
-@app.post("/workouts/user/{user_name}/start", dependencies=[Depends(JWTBearer())])
+@app.put("/workouts/user/{user_name}/start", dependencies=[Depends(JWTBearer())])
 def start_workout(user_name: str, db: Session = Depends(get_db)):
     return crud.start_workout(db=db, user_name=user_name)
 
