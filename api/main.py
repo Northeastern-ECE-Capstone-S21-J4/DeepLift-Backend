@@ -156,7 +156,7 @@ def get_user_date_wo(user_name: str, date_recorded: str, db: Session = Depends(g
 
 # [POST] Create a new workout
 # USES: Create new workout
-@app.post("/workouts", response_model=schemas.workout.WorkoutReturn)
+@app.post("/workouts", dependencies=[Depends(JWTBearer())], response_model=schemas.workout.WorkoutReturn)
 def create_workout(workout: schemas.workout.WorkoutCreate, db: Session = Depends(get_db)):
     return crud.create_workout(db=db, workout=workout)
 
