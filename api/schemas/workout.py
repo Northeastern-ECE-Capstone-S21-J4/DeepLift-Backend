@@ -23,9 +23,8 @@ class Workout(WorkoutBase):
     workoutID: int
     exerciseName: str
     dateRecorded: date
-    video_path: str
-    keypoints_path: str
-    analytics_path: str
+    video_with_path: str
+    video_without_path: str
 
 # -------------------------------------------------------------------------------------------------------
 # [POST]
