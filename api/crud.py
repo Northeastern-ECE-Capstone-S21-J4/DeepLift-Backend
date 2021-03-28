@@ -224,7 +224,7 @@ def get_bucket_paths(workout_id: int):
 # Add hardcoded fields and exerciseName to the return
 def add_workout_fields(workout):
     workout.exerciseName = workout.exercise.exerciseName
-    vwp, vwop, ap = get_bucket_paths(workout_id=workout.workoutID)
+    vwp, vwop = get_bucket_paths(workout_id=workout.workoutID)
     workout.video_with_path = vwp
     workout.video_without_path = vwop
 
