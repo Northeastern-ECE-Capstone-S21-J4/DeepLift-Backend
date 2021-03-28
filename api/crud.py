@@ -8,7 +8,7 @@ import hashlib
 
 # -----------------------------------------------------------------------------------------------------
 # CONSTANTS
-S3_PATH = 'arn:aws:s3:us-east-1:176944131608:accesspoint/video-access'
+#S3_PATH = 'arn:aws:s3:us-east-1:176944131608:accesspoint/video-access'
 
 # -----------------------------------------------------------------------------------------------------
 # /users
@@ -160,7 +160,7 @@ def create_workout(db: Session, workout: schemas.workout.WorkoutCreate):
     db.commit()
 
     vp, kp, ap = get_bucket_paths(db_workout.workoutID)
-    return {'video_path': vp, 'keypoints_path': kp, 'analytics_path': ap, "workoutID": db_workout.workoutID}
+    return {'video_with_path': vp, 'video_without_path': kp, 'analytics_path': ap}
 
 
 # Update a workout with the new information
@@ -215,10 +215,9 @@ def get_exercises(db: Session):
 
 # Get the paths to information stored in s3
 def get_bucket_paths(workout_id: int):
-    workout_path = os.path.join(S3_PATH, str(workout_id))
-    video_path = os.path.join(workout_path, 'video.avi')
-    keypoints_path = os.path.join(workout_path, 'keypoints.json')
-    analytics_path = os.path.join(workout_path, 'analytics.json')
+    video_path = os.path.join(str(workout_id), 'video_with.mp4')
+    keypoints_path = os.path.join(str(workout_id), 'video_without.mp4')
+    analytics_path = os.path.join(str(workout_id), 'analytics.json')
 
     return video_path, keypoints_path, analytics_path
 
