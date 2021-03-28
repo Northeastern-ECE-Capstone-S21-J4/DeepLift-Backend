@@ -32,7 +32,7 @@ class Workout(WorkoutBase):
 
 
 class WorkoutCreate(BaseModel):
-    userName: str
+    username: str
     exerciseID: int
     reps: int
     weight: int
