@@ -143,7 +143,7 @@ def get_user_date_wo(db: Session, user_name: str, date_recorded: str):
 def create_workout(db: Session, workout: schemas.workout.WorkoutCreate):
     workout_date = date.today().isoformat()
     db_workout = models.Workout(
-        userName=workout.userName,
+        userName=workout.username,
         reps=workout.reps,
         weight=workout.weight,
         exerciseID=workout.exerciseID,
@@ -154,7 +154,7 @@ def create_workout(db: Session, workout: schemas.workout.WorkoutCreate):
     db.refresh(db_workout)
 
     user_lifting_instance = db.query(models.UserLifting).filter(
-        models.UserLifting.userName == workout.userName
+        models.UserLifting.userName == workout.username
     ).first()
     user_lifting_instance.difficulty = -1
     db.commit()
